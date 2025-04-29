@@ -22,9 +22,10 @@ class Thyroid_Dataset(Dataset):
         dataset = self.df["dataset"][idx]
 
         if dataset == "DDTI":
-            image_path = self.data_path+f"/DDTI dataset/DDTI/2_preprocessed_data/stage_2/p_image/{ID}.png"
-            mask_path = self.data_path+f"/DDTI dataset/DDTI/2_preprocessed_data/stage_2/p_mask/{ID}.png"
+            image_path = self.data_path+f"/DDTI dataset/DDTI/2_preprocessed_data/stage2/p_image/{ID}.PNG"
+            mask_path = self.data_path+f"/DDTI dataset/DDTI/2_preprocessed_data/stage2/p_mask/{ID}.PNG"
         elif dataset == "TG3K":
+            ID = str(ID).zfill(4)
             image_path = self.data_path+f"/tg3k/thyroid-image/{ID}.jpg"
             mask_path = self.data_path+f"/tg3k/thyroid-mask/{ID}.jpg"
         elif dataset == "TN3K":
