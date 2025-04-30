@@ -1,0 +1,29 @@
+{"time":"2025-04-30T00:17:52.4942066+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.10","symlink path":"C:\\Users\\oplab\\Desktop\\Tony\\Thyroid\\code\\wandb\\run-20250430_001752-xnrny6so\\logs\\debug-core.log"}
+{"time":"2025-04-30T00:17:52.9476143+08:00","level":"INFO","msg":"created new stream","id":"xnrny6so"}
+{"time":"2025-04-30T00:17:52.9476143+08:00","level":"INFO","msg":"stream: started","id":"xnrny6so"}
+{"time":"2025-04-30T00:17:52.9476143+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"xnrny6so"}
+{"time":"2025-04-30T00:17:52.9476143+08:00","level":"INFO","msg":"sender: started","stream_id":"xnrny6so"}
+{"time":"2025-04-30T00:17:52.9476143+08:00","level":"INFO","msg":"handler: started","stream_id":"xnrny6so"}
+{"time":"2025-04-30T00:17:53.2914746+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-04-30T00:19:33.7561869+08:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-04-30T00:19:34.5535612+08:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-04-30T00:19:35.1092159+08:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-04-30T00:19:35.122034+08:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-04-30T00:19:36.1190389+08:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-04-30T00:25:58.3010617+08:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-04-30T00:26:03.941781+08:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-04-30T00:26:03.9769593+08:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-04-30T00:26:13.7002075+08:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-04-30T00:26:13.7015585+08:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-04-30T00:26:14.5088053+08:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-04-30T00:26:14.5135285+08:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-04-30T00:26:23.0795662+08:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-04-30T00:26:23.0899983+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-04-30T00:26:23.0899983+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-04-30T00:26:24.0585572+08:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-04-30T00:26:24.1044251+08:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading summary","runtime_seconds":0.0458679}],"total_operations":1}}
+{"time":"2025-04-30T00:26:24.3655568+08:00","level":"INFO","msg":"stream: closing","id":"xnrny6so"}
+{"time":"2025-04-30T00:26:24.3655568+08:00","level":"INFO","msg":"handler: closed","stream_id":"xnrny6so"}
+{"time":"2025-04-30T00:26:24.3655568+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"xnrny6so"}
+{"time":"2025-04-30T00:26:24.3655568+08:00","level":"INFO","msg":"sender: closed","stream_id":"xnrny6so"}
+{"time":"2025-04-30T00:26:24.3655568+08:00","level":"INFO","msg":"stream: closed","id":"xnrny6so"}

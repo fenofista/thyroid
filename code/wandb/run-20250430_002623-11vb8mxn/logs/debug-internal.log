@@ -1,0 +1,7 @@
+{"time":"2025-04-30T00:26:24.3678279+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.10","symlink path":"C:\\Users\\oplab\\Desktop\\Tony\\Thyroid\\code\\wandb\\run-20250430_002623-11vb8mxn\\logs\\debug-core.log"}
+{"time":"2025-04-30T00:26:24.670009+08:00","level":"INFO","msg":"created new stream","id":"11vb8mxn"}
+{"time":"2025-04-30T00:26:24.6705391+08:00","level":"INFO","msg":"stream: started","id":"11vb8mxn"}
+{"time":"2025-04-30T00:26:24.6705391+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"11vb8mxn"}
+{"time":"2025-04-30T00:26:24.6705391+08:00","level":"INFO","msg":"handler: started","stream_id":"11vb8mxn"}
+{"time":"2025-04-30T00:26:24.6705391+08:00","level":"INFO","msg":"sender: started","stream_id":"11vb8mxn"}
+{"time":"2025-04-30T00:26:24.9597684+08:00","level":"INFO","msg":"Starting system monitor"}

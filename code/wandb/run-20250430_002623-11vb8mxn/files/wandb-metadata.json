@@ -1,0 +1,40 @@
+{
+  "os": "Windows-11-10.0.26100-SP0",
+  "python": "CPython 3.12.10",
+  "startedAt": "2025-04-29T16:26:24.367320Z",
+  "program": "<python with no main file>",
+  "git": {
+    "remote": "https://github.com/fenofista/thyroid.git",
+    "commit": "feb7aefc589f545038291f91007783e8325635d4"
+  },
+  "email": "s960068sss@gmail.com",
+  "root": "C:\\Users\\oplab\\Desktop\\Tony\\Thyroid\\code",
+  "host": "DESKTOP-G5G6L1I",
+  "executable": "C:\\Users\\oplab\\anaconda3\\envs\\thyroid\\python.exe",
+  "cpu_count": 6,
+  "cpu_count_logical": 12,
+  "gpu": "NVIDIA GeForce RTX 2080",
+  "gpu_count": 1,
+  "disk": {
+    "/": {
+      "total": "1998872035328",
+      "used": "1660868325376"
+    }
+  },
+  "memory": {
+    "total": "68519604224"
+  },
+  "cpu": {
+    "count": 6,
+    "countLogical": 12
+  },
+  "gpu_nvidia": [
+    {
+      "name": "NVIDIA GeForce RTX 2080",
+      "memoryTotal": "8589934592",
+      "cudaCores": 2944,
+      "architecture": "Turing"
+    }
+  ],
+  "cudaVersion": "12.8"
+}
