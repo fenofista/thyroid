@@ -1,0 +1,79 @@
+2025-04-30 09:56:08,884 INFO    MainThread:12904 [wandb_init.py:setup_run_log_directory():724] Logging user logs to C:\Users\oplab\Desktop\Tony\Thyroid\code\wandb\run-20250430_095608-7ap8xpzn\logs\debug.log
+2025-04-30 09:56:08,884 INFO    MainThread:12904 [wandb_init.py:setup_run_log_directory():725] Logging internal logs to C:\Users\oplab\Desktop\Tony\Thyroid\code\wandb\run-20250430_095608-7ap8xpzn\logs\debug-internal.log
+2025-04-30 09:56:08,884 INFO    MainThread:12904 [wandb_init.py:init():852] calling init triggers
+2025-04-30 09:56:08,884 INFO    MainThread:12904 [wandb_init.py:init():857] wandb.init called with sweep_config: {}
+config: {'image_size': 128, 'learning_rate': 0.001, 'epochs': 20, 'batch_size': 8, '_wandb': {}}
+2025-04-30 09:56:37,664 WARNING MsgRouterThr:12904 [router.py:message_loop():63] [no run ID] message_loop has been closed
+Traceback (most recent call last):
+  File "C:\Users\oplab\anaconda3\envs\thyroid\Lib\site-packages\wandb\sdk\lib\sock_client.py", line 208, in _read_packet_bytes
+    data = self._sock.recv(self._bufsize)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] 遠端主機已強制關閉一個現存的連線。
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\oplab\anaconda3\envs\thyroid\Lib\site-packages\wandb\sdk\interface\router_sock.py", line 27, in _read_message
+    return self._sock_client.read_server_response(timeout=1)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\oplab\anaconda3\envs\thyroid\Lib\site-packages\wandb\sdk\lib\sock_client.py", line 235, in read_server_response
+    data = self._read_packet_bytes(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\oplab\anaconda3\envs\thyroid\Lib\site-packages\wandb\sdk\lib\sock_client.py", line 212, in _read_packet_bytes
+    raise SockClientClosedError from e
+wandb.sdk.lib.sock_client.SockClientClosedError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\oplab\anaconda3\envs\thyroid\Lib\site-packages\wandb\sdk\interface\router.py", line 56, in message_loop
+    msg = self._read_message()
+          ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\oplab\anaconda3\envs\thyroid\Lib\site-packages\wandb\sdk\interface\router_sock.py", line 29, in _read_message
+    raise MessageRouterClosedError from e
+wandb.sdk.interface.router.MessageRouterClosedError
+2025-04-30 09:56:37,672 INFO    MsgRouterThr:12904 [mailbox.py:close():129] [no run ID] Closing mailbox, abandoning 2 handles.
+2025-04-30 09:56:37,680 WARNING MainThread:12904 [wandb_init.py:init():1654] [no run ID] interrupted
+Traceback (most recent call last):
+  File "C:\Users\oplab\anaconda3\envs\thyroid\Lib\site-packages\wandb\sdk\wandb_init.py", line 1650, in init
+    return wi.init(run_settings, run_config, run_printer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\oplab\anaconda3\envs\thyroid\Lib\site-packages\wandb\sdk\wandb_init.py", line 873, in init
+    self._wl.finish_all_active_runs()
+  File "C:\Users\oplab\anaconda3\envs\thyroid\Lib\site-packages\wandb\sdk\wandb_setup.py", line 150, in finish_all_active_runs
+    run.finish()
+  File "C:\Users\oplab\anaconda3\envs\thyroid\Lib\site-packages\wandb\sdk\wandb_run.py", line 406, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\oplab\anaconda3\envs\thyroid\Lib\site-packages\wandb\sdk\wandb_run.py", line 503, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\oplab\anaconda3\envs\thyroid\Lib\site-packages\wandb\sdk\wandb_run.py", line 451, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\oplab\anaconda3\envs\thyroid\Lib\site-packages\wandb\sdk\wandb_run.py", line 2302, in finish
+    return self._finish(exit_code)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\oplab\anaconda3\envs\thyroid\Lib\site-packages\wandb\sdk\wandb_run.py", line 406, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\oplab\anaconda3\envs\thyroid\Lib\site-packages\wandb\sdk\wandb_run.py", line 2330, in _finish
+    self._atexit_cleanup(exit_code=exit_code)
+  File "C:\Users\oplab\anaconda3\envs\thyroid\Lib\site-packages\wandb\sdk\wandb_run.py", line 2543, in _atexit_cleanup
+    self._on_finish()
+  File "C:\Users\oplab\anaconda3\envs\thyroid\Lib\site-packages\wandb\sdk\wandb_run.py", line 2799, in _on_finish
+    wait_with_progress(
+  File "C:\Users\oplab\anaconda3\envs\thyroid\Lib\site-packages\wandb\sdk\mailbox\wait_with_progress.py", line 24, in wait_with_progress
+    return wait_all_with_progress(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\oplab\anaconda3\envs\thyroid\Lib\site-packages\wandb\sdk\mailbox\wait_with_progress.py", line 87, in wait_all_with_progress
+    return asyncio_compat.run(progress_loop_with_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\oplab\anaconda3\envs\thyroid\Lib\site-packages\wandb\sdk\lib\asyncio_compat.py", line 30, in run
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\oplab\anaconda3\envs\thyroid\Lib\concurrent\futures\_base.py", line 451, in result
+    self._condition.wait(timeout)
+  File "C:\Users\oplab\anaconda3\envs\thyroid\Lib\threading.py", line 355, in wait
+    waiter.acquire()
+KeyboardInterrupt

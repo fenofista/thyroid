@@ -15,28 +15,34 @@ class Thyroid_Dataset(Dataset):
         self.df = pd.read_csv(f"{self.data_path}/{self.csv_file}")
         self.transform = transform
         self.augmentation=augmentation
+        self.cache = {}
     def __len__(self):
         return len(self.df)
 
     def __getitem__(self, idx):
         ID = self.df["ID"][idx]
         dataset = self.df["dataset"][idx]
-
-        if dataset == "DDTI":
-            image_path = self.data_path+f"/DDTI dataset/DDTI/2_preprocessed_data/stage2/p_image/{ID}.PNG"
-            mask_path = self.data_path+f"/DDTI dataset/DDTI/2_preprocessed_data/stage2/p_mask/{ID}.PNG"
-        elif dataset == "TG3K":
-            ID = str(ID).zfill(4)
-            image_path = self.data_path+f"/tg3k/thyroid-image/{ID}.jpg"
-            mask_path = self.data_path+f"/tg3k/thyroid-mask/{ID}.jpg"
-        elif dataset == "TN3K":
-            ID = str(ID).zfill(4)
-            image_path = self.data_path+f"/tn3k/trainval-image/{ID}.jpg"
-            mask_path = self.data_path+f"/tn3k/trainval-mask/{ID}.jpg"
-
-        image = Image.open(image_path).convert("L")
-        mask = Image.open(mask_path).convert("L")
-
+        
+        
+        if f"{dataset}_{ID}" in self.cache:
+            image, mask = self.cache[f"{dataset}_{ID}"]
+        else:
+            if dataset == "DDTI":
+                image_path = self.data_path+f"/DDTI dataset/DDTI/2_preprocessed_data/stage2/p_image/{ID}.PNG"
+                mask_path = self.data_path+f"/DDTI dataset/DDTI/2_preprocessed_data/stage2/p_mask/{ID}.PNG"
+            elif dataset == "TG3K":
+                ID = str(ID).zfill(4)
+                image_path = self.data_path+f"/tg3k/thyroid-image/{ID}.jpg"
+                mask_path = self.data_path+f"/tg3k/thyroid-mask/{ID}.jpg"
+            elif dataset == "TN3K":
+                ID = str(ID).zfill(4)
+                image_path = self.data_path+f"/tn3k/trainval-image/{ID}.jpg"
+                mask_path = self.data_path+f"/tn3k/trainval-mask/{ID}.jpg"
+    
+            image = Image.open(image_path).convert("L")
+            mask = Image.open(mask_path).convert("L")
+            self.cache[f"{dataset}_{ID}"] = (image, mask)
+        
         if self.augmentation:
             image, mask = self.perform_aug(image, mask, 0.5)
 

@@ -1,0 +1,17 @@
+{"time":"2025-04-30T09:55:27.641165+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.10","symlink path":"C:\\Users\\oplab\\Desktop\\Tony\\Thyroid\\code\\wandb\\run-20250430_095527-f06or45x\\logs\\debug-core.log"}
+{"time":"2025-04-30T09:55:28.1096429+08:00","level":"INFO","msg":"created new stream","id":"f06or45x"}
+{"time":"2025-04-30T09:55:28.1096429+08:00","level":"INFO","msg":"stream: started","id":"f06or45x"}
+{"time":"2025-04-30T09:55:28.1096429+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"f06or45x"}
+{"time":"2025-04-30T09:55:28.1096429+08:00","level":"INFO","msg":"sender: started","stream_id":"f06or45x"}
+{"time":"2025-04-30T09:55:28.1102662+08:00","level":"INFO","msg":"handler: started","stream_id":"f06or45x"}
+{"time":"2025-04-30T09:55:28.4096432+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-04-30T09:55:59.2150941+08:00","level":"ERROR","msg":"HTTP error","status":404,"method":"POST","url":"https://api.wandb.ai/files/s960068sss-ucl/thyroid/f06or45x/file_stream"}
+{"time":"2025-04-30T09:55:59.2150941+08:00","level":"ERROR+4","msg":"filestream: fatal error: filestream: failed to upload: 404 Not Found path=files/s960068sss-ucl/thyroid/f06or45x/file_stream: {\"error\":\"run thyroid/f06or45x not found while streaming file\"}"}
+{"time":"2025-04-30T09:56:08.8781879+08:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-04-30T09:56:08.8884449+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-04-30T09:56:08.8884449+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-04-30T09:56:09.0860526+08:00","level":"INFO","msg":"api: retrying HTTP error","status":409,"url":"https://api.wandb.ai/graphql","body":"{\"errors\":[{\"message\":\"run f06or45x was previously created and deleted; try a new run name\",\"path\":[\"upsertBucket\"]}],\"data\":{\"upsertBucket\":null}}"}
+{"time":"2025-04-30T09:56:09.8950514+08:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"updating run config","runtime_seconds":1.0084143,"error_status":"retrying HTTP 409: run f06or45x was previously created and deleted; try a new run name"}],"total_operations":1}}
+{"time":"2025-04-30T09:56:11.7810253+08:00","level":"INFO","msg":"api: retrying HTTP error","status":409,"url":"https://api.wandb.ai/graphql","body":"{\"errors\":[{\"message\":\"run f06or45x was previously created and deleted; try a new run name\",\"path\":[\"upsertBucket\"]}],\"data\":{\"upsertBucket\":null}}"}
+{"time":"2025-04-30T09:56:16.6306827+08:00","level":"INFO","msg":"api: retrying HTTP error","status":409,"url":"https://api.wandb.ai/graphql","body":"{\"errors\":[{\"message\":\"run f06or45x was previously created and deleted; try a new run name\",\"path\":[\"upsertBucket\"]}],\"data\":{\"upsertBucket\":null}}"}
+{"time":"2025-04-30T09:56:25.2404204+08:00","level":"INFO","msg":"api: retrying HTTP error","status":409,"url":"https://api.wandb.ai/graphql","body":"{\"errors\":[{\"message\":\"run f06or45x was previously created and deleted; try a new run name\",\"path\":[\"upsertBucket\"]}],\"data\":{\"upsertBucket\":null}}"}
