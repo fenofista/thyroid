@@ -681,11 +681,12 @@ class Eff_Unet(nn.Module):
                  distillation=True,
                  resolution=224,
                  e_ratios=expansion_ratios_L,
+                 input_channels = 1,
                  **kwargs):
         super().__init__()
 
         self.num_classes = num_classes
-        self.patch_embed = stem(1, embed_dims[0], act_layer=act_layer)
+        self.patch_embed = stem(input_channels, embed_dims[0], act_layer=act_layer)
         self.up = merge(embed_dims[0],embed_dims[0], act_layer=act_layer)
         self.output = nn.Conv2d(in_channels=embed_dims[0],out_channels=self.num_classes,kernel_size=1,bias=False)
     
