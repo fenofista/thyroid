@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-
+import torch.nn.functional as F
 class DiceLoss(nn.Module):
     def __init__(self, smooth=1e-6):
         super(DiceLoss, self).__init__()
@@ -35,4 +35,29 @@ def IOU_score(preds, targets, threshold=0.5, eps=1e-6):
 
     iou = (intersection + eps) / (union + eps)
     return iou.mean()  # return average IoU across batch
+
+
+
+class StructureLoss(nn.Module):
+    def __init__(self):
+        super(StructureLoss, self).__init__()
+
+    def forward(self, pred, mask):
+        """
+        inputs: (N, 1, H, W) - predicted probabilities (after sigmoid)
+        targets: (N, 1, H, W) - ground truth (0 or 1)
+        """
+        # inputs = inputs.view(-1)
+        # targets = targets.view(-1)
+
+        weit = 1 + 5*torch.abs(F.avg_pool2d(mask, kernel_size=31, stride=1, padding=15) - mask)
+        wbce = F.binary_cross_entropy_with_logits(pred, mask, reduce='none')
+        wbce = (weit*wbce).sum(dim=(2, 3)) / weit.sum(dim=(2, 3))
+    
+        pred = torch.sigmoid(pred)
+        inter = ((pred * mask)*weit).sum(dim=(2, 3))
+        union = ((pred + mask)*weit).sum(dim=(2, 3))
+        wiou = 1 - (inter + 1)/(union - inter+1)
+
+        return (wbce + wiou).mean()  # because we want to minimize the loss
 
