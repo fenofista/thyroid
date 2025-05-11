@@ -1,6 +1,10 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+
+# No need to do any activation in train pipeline, model output activation will be add it here.
+
 class DiceLoss(nn.Module):
     def __init__(self, smooth=1e-6):
         super(DiceLoss, self).__init__()
@@ -11,6 +15,7 @@ class DiceLoss(nn.Module):
         inputs: (N, 1, H, W) - predicted probabilities (after sigmoid)
         targets: (N, 1, H, W) - ground truth (0 or 1)
         """
+        inputs = nn.Sigmoid()(inputs)
         inputs = inputs.view(-1)
         targets = targets.view(-1)
 
@@ -27,6 +32,7 @@ def IOU_score(preds, targets, threshold=0.5, eps=1e-6):
     threshold: threshold to binarize predictions
     eps: small value to avoid division by zero
     """
+    preds = nn.Sigmoid()(preds)
     preds = (preds > threshold).float()
     targets = targets.float()
 
