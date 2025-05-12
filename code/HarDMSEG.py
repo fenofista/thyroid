@@ -66,7 +66,7 @@ class RFB_modified(nn.Module):
 class aggregation(nn.Module):
     # dense aggregation, it can be replaced by other aggregation previous, such as DSS, amulet, and so on.
     # used after MSF
-    def __init__(self, channel):
+    def __init__(self, channel, out_channels = 2):
         super(aggregation, self).__init__()
         self.relu = nn.ReLU(True)
 
@@ -80,7 +80,7 @@ class aggregation(nn.Module):
         self.conv_concat2 = BasicConv2d(2*channel, 2*channel, 3, padding=1)
         self.conv_concat3 = BasicConv2d(3*channel, 3*channel, 3, padding=1)
         self.conv4 = BasicConv2d(3*channel, 3*channel, 3, padding=1)
-        self.conv5 = nn.Conv2d(3*channel, 1, 1)
+        self.conv5 = nn.Conv2d(3*channel, out_channels, 1)
 
     def forward(self, x1, x2, x3):
         x1_1 = x1
@@ -102,7 +102,7 @@ class aggregation(nn.Module):
 
 class HarDMSEG(nn.Module):
     # res2net based encoder decoder
-    def __init__(self, channel=32):
+    def __init__(self, channel=32, in_channels = 1, out_channels = 2):
         super(HarDMSEG, self).__init__()
         # ---- ResNet Backbone ----
         #self.resnet = res2net50_v1b_26w_4s(pretrained=True)
@@ -114,7 +114,7 @@ class HarDMSEG(nn.Module):
         self.rfb4_1 = RFB_modified(1024, channel)
         # ---- Partial Decoder ----
         #self.agg1 = aggregation(channel)
-        self.agg1 = aggregation(32)
+        self.agg1 = aggregation(32, out_channels = out_channels)
         # ---- reverse attention branch 4 ----
         self.ra4_conv1 = BasicConv2d(1024, 256, kernel_size=1)
         self.ra4_conv2 = BasicConv2d(256, 256, kernel_size=5, padding=2)
@@ -137,7 +137,7 @@ class HarDMSEG(nn.Module):
         self.conv5 = BasicConv2d(1024, 1024, 3, padding=1)
         self.conv6 = nn.Conv2d(1024, 1, 1)
         self.upsample = nn.Upsample(scale_factor=4, mode='bilinear', align_corners=True)
-        self.hardnet = hardnet(arch=68)
+        self.hardnet = hardnet(arch=68, in_channels = in_channels)
         
     def forward(self, x):
         #print("input",x.size())

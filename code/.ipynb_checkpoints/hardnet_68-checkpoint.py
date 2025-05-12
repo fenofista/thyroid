@@ -98,7 +98,7 @@ class HarDBlock(nn.Module):
 
 # +
 class HarDNet(nn.Module):
-    def __init__(self, depth_wise=False, arch=85, pretrained=True, weight_path=''):
+    def __init__(self, depth_wise=False, arch=85, pretrained=True, weight_path='', in_channels = 1):
         super().__init__()
         first_ch  = [32, 64]
         second_kernel = 3
@@ -139,7 +139,7 @@ class HarDNet(nn.Module):
 
         # First Layer: Standard Conv3x3, Stride=2
         self.base.append (
-             ConvLayer(in_channels=3, out_channels=first_ch[0], kernel=3,
+             ConvLayer(in_channels=in_channels, out_channels=first_ch[0], kernel=3,
                        stride=2,  bias=False) )
   
         # Second Layer
@@ -195,11 +195,11 @@ class HarDNet(nn.Module):
             
         return out_branch
     
-def hardnet(arch=68,pretrained=False, **kwargs):
+def hardnet(arch=68,pretrained=False, in_channels = 1, **kwargs):
     pretrained = False
     if arch ==68:
         print("68 LOADED")
-        model = HarDNet(arch=68)
+        model = HarDNet(arch=68, in_channels = in_channels)
         if pretrained:
             weights = torch.load('/home/james128333/PraNet/lib/hardnet68.pth')
             model.load_state_dict(weights)
