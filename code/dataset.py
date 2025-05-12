@@ -6,23 +6,26 @@ import os
 from torchvision import transforms
 import pandas as pd
 import matplotlib.pyplot as plt
-import torchvision.transforms.functional as TF
+import torchvision.transforms.functional as tx
 import random
 import cv2
 from PIL import ImageEnhance
 from skimage.exposure import match_histograms
+import torchvision.transforms as T
+import torchvision.transforms.functional as F
 class Thyroid_Dataset(Dataset):
-    def __init__(self, csv_file, transform=None, return_from_dataset = False, crop_DDTI = False, histo_match = False):
+    def __init__(self, csv_file, transform, image_size = 128, return_from_dataset = False, crop_DDTI = False, histo_match = False):
         self.csv_file = csv_file
         self.data_path = "../data"
-        self.df = pd.read_csv(f"{self.data_path}/{self.csv_file}")
         self.transform = transform
+        self.df = pd.read_csv(f"{self.data_path}/{self.csv_file}")
         self.cache = {}
         self.return_from_dataset = return_from_dataset
         self.crop_DDTI = crop_DDTI
         self.histo_match = histo_match
         image_path = self.data_path+f"/tn3k/trainval-image/0001.jpg"
         self.histo_match_image = Image.open(image_path).convert("L")
+        self.image_size = image_size
     def __len__(self):
         return len(self.df)
 
@@ -66,8 +69,13 @@ class Thyroid_Dataset(Dataset):
         if dataset == "DDTI" and self.histo_match:
             image = self.histogram_match(image, self.histo_match_image)
             
-        image_tensor = self.transform(image)
-        mask_tensor = self.transform(mask)
+        
+        
+        image_tensor, mask_tensor = self.transform(image, mask, self.image_size)
+
+
+
+        
         mask_tensor = (mask_tensor > 0.5).float()
 
         seg_type = torch.tensor(seg_type)
