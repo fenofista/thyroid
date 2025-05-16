@@ -96,86 +96,133 @@ class EncoderBlock(nn.Module):
         x = self.conv(x)
         return x
 
+# class HarDNetBackbone(nn.Module):
+#     def __init__(self, in_channels = 1):
+#         super(HarDNetBackbone, self).__init__()
+
+#         base_out_ch = [32, 64]
+#         self.base_conv_1 = ConvLayer(in_channels = in_channels, out_channels = base_out_ch[0], kernel = 3, stride = 2,  bias = False)
+#         self.base_conv2 = ConvLayer(in_channels = base_out_ch[0], out_channels = base_out_ch[1],  kernel = 3)
+#         self.base_max_pool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+
+
+        
+#         grmul = 1.7
+#         drop_rate = 0.1
+#         ch_list = [  128, 256, 320, 640, 1024]
+#         gr       = [  14, 16, 20, 40,160]
+#         n_layers = [   8, 16, 16, 16,  4]
+#         # downSamp = [   1,  0,  1,  1,  0]
+        
+#         encoder_block1_input_ch = 64
+#         self.encoder_block1 = EncoderBlock(encoder_block1_input_ch, gr[0], grmul, n_layers[0], ch_list[0])
+#         self.encoder_max_pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
+
+#         encoder_block2_input_ch = ch_list[0]
+#         self.encoder_block2 = EncoderBlock(encoder_block2_input_ch, gr[1], grmul, n_layers[1], ch_list[1])
+#         encoder_block3_input_ch = ch_list[1]
+#         self.encoder_block3 = EncoderBlock(encoder_block3_input_ch, gr[2], grmul, n_layers[2], ch_list[2])
+#         self.encoder_max_pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
+        
+        
+#         encoder_block4_input_ch = ch_list[2]
+#         self.encoder_block4 = EncoderBlock(encoder_block4_input_ch, gr[3], grmul, n_layers[3], ch_list[3])
+#         self.encoder_max_pool3 = nn.MaxPool2d(kernel_size=2, stride=2)
+
+#         encoder_block5_input_ch = ch_list[3]
+#         self.encoder_block5 = EncoderBlock(encoder_block5_input_ch, gr[4], grmul, n_layers[4], ch_list[4])
+
+
+#         self.attention_channels = [base_out_ch[1], ch_list[0], ch_list[2], ch_list[3], ch_list[3], ch_list[4]]
+
+#     def forward(self, x):
+#         attention_list = []
+#         x = self.base_conv_1(x)
+#         x = self.base_conv2(x)
+#         # print(x.shape)
+#         attention_list.append(x)
+#         x1 = self.base_max_pool(x)
+
+#         x1 = self.encoder_block1(x1)
+#         # print(x1.shape)
+#         attention_list.append(x1)
+#         x2 = self.encoder_max_pool1(x1)
+
+#         x2 = self.encoder_block2(x2)
+#         x2 = self.encoder_block3(x2)
+#         # print(x2.shape)
+#         attention_list.append(x2)
+#         x3 = self.encoder_max_pool2(x2)
+
+#         x3 = self.encoder_block4(x3)
+#         # print(x3.shape)
+#         attention_list.append(x3)
+#         x4 = self.encoder_max_pool3(x3)
+#         # print(x4.shape)
+#         attention_list.append(x4)
+        
+#         x5 = self.encoder_block5(x4)
+#         # print(x5.shape)
+#         attention_list.append(x5)
+
+
+#         # dimension = [
+#         #     x : base_out_ch[1], W/2, H/2
+#         #     x1 : ch_list[0], W/4, H/4
+#         #     x2 : ch_list[2], W/8, H/8
+#         #     x3 : ch_list[3], W/16, H/16
+#         #     x4 : ch_list[3], W/32, W/32
+#         #     x5 : ch_list[4], W/32, W/32
+#         # ]
+#         return attention_list
+
 class HarDNetBackbone(nn.Module):
-    def __init__(self, in_channels = 1):
+    def __init__(
+        self,
+        in_channels=1,
+        base_out_ch=[32, 64],
+        grmul=1.7,
+        drop_rate=0.1,
+        ch_list=[128, 256, 320, 640, 1024],
+        gr_list=[14, 16, 20, 40, 160],
+        n_layers=[8, 16, 16, 16, 4],
+        pool_layer=[1, 0, 1, 1, 0]
+    ):
         super(HarDNetBackbone, self).__init__()
 
-        base_out_ch = [32, 64]
-        self.base_conv_1 = ConvLayer(in_channels = in_channels, out_channels = base_out_ch[0], kernel = 3, stride = 2,  bias = False)
-        self.base_conv2 = ConvLayer(in_channels = base_out_ch[0], out_channels = base_out_ch[1],  kernel = 3)
+        assert len(ch_list) == len(gr_list) == len(n_layers), "Length of ch_list, gr_list, and n_layers must match"
+
+        self.base_conv_1 = ConvLayer(in_channels=in_channels, out_channels=base_out_ch[0], kernel=3, stride=2, bias=False)
+        self.base_conv_2 = ConvLayer(in_channels=base_out_ch[0], out_channels=base_out_ch[1], kernel=3)
         self.base_max_pool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 
-
-        
-        grmul = 1.7
-        drop_rate = 0.1
-        ch_list = [  128, 256, 320, 640, 1024]
-        gr       = [  14, 16, 20, 40,160]
-        n_layers = [   8, 16, 16, 16,  4]
-        # downSamp = [   1,  0,  1,  1,  0]
-
-        encoder_block1_input_ch = 64
-        self.encoder_block1 = EncoderBlock(encoder_block1_input_ch, gr[0], grmul, n_layers[0], ch_list[0])
-        self.encoder_max_pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
-
-        encoder_block2_input_ch = ch_list[0]
-        self.encoder_block2 = EncoderBlock(encoder_block2_input_ch, gr[1], grmul, n_layers[1], ch_list[1])
-        encoder_block3_input_ch = ch_list[1]
-        self.encoder_block3 = EncoderBlock(encoder_block3_input_ch, gr[2], grmul, n_layers[2], ch_list[2])
-        self.encoder_max_pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
-        
-
-        encoder_block4_input_ch = ch_list[2]
-        self.encoder_block4 = EncoderBlock(encoder_block4_input_ch, gr[3], grmul, n_layers[3], ch_list[3])
-        self.encoder_max_pool3 = nn.MaxPool2d(kernel_size=2, stride=2)
-
-        encoder_block5_input_ch = ch_list[3]
-        self.encoder_block5 = EncoderBlock(encoder_block5_input_ch, gr[4], grmul, n_layers[4], ch_list[4])
-
-
-        self.attention_channels = [base_out_ch[1], ch_list[0], ch_list[2], ch_list[3], ch_list[3], ch_list[4]]
+        self.encoder_blocks = nn.ModuleList()
+        self.encoder_pools = nn.ModuleList()
+        self.attention_channels = [base_out_ch[1]]  # First attention from base_conv2
+        self.pool_layer = pool_layer
+        in_ch = base_out_ch[1]
+        for i in range(len(ch_list)):
+            block = EncoderBlock(in_ch, gr_list[i], grmul, n_layers[i], ch_list[i])
+            self.encoder_blocks.append(block)
+            self.attention_channels.append(ch_list[i])
+            self.encoder_pools.append(nn.MaxPool2d(kernel_size=2, stride=2))
+            in_ch = ch_list[i]
 
     def forward(self, x):
         attention_list = []
         x = self.base_conv_1(x)
-        x = self.base_conv2(x)
-        # print(x.shape)
+        x = self.base_conv_2(x)
         attention_list.append(x)
-        x1 = self.base_max_pool(x)
-
-        x1 = self.encoder_block1(x1)
-        # print(x1.shape)
-        attention_list.append(x1)
-        x2 = self.encoder_max_pool1(x1)
-
-        x2 = self.encoder_block2(x2)
-        x2 = self.encoder_block3(x2)
-        # print(x2.shape)
-        attention_list.append(x2)
-        x3 = self.encoder_max_pool2(x2)
-
-        x3 = self.encoder_block4(x3)
-        # print(x3.shape)
-        attention_list.append(x3)
-        x4 = self.encoder_max_pool3(x3)
-        # print(x4.shape)
-        attention_list.append(x4)
         
-        x5 = self.encoder_block5(x4)
-        # print(x5.shape)
-        attention_list.append(x5)
+        x = self.base_max_pool(x)
 
+        for i, block in enumerate(self.encoder_blocks):
+            x = block(x)
+            attention_list.append(x)
+            if self.pool_layer[i]:
+                x = self.encoder_pools[i](x)
 
-        # dimension = [
-        #     x : base_out_ch[1], W/2, H/2
-        #     x1 : ch_list[0], W/4, H/4
-        #     x2 : ch_list[2], W/8, H/8
-        #     x3 : ch_list[3], W/16, H/16
-        #     x4 : ch_list[3], W/32, W/32
-        #     x5 : ch_list[4], W/32, W/32
-        # ]
         return attention_list
-
 class AMFF(nn.Module):
     def __init__(self, n_inputs=5, in_channels = [0, 0, 0, 0, 0], out_channels = [12, 12, 12, 12, 12]):
         super(AMFF, self).__init__()
@@ -291,7 +338,7 @@ class PMSS(nn.Module):
 class PMFS(nn.Module):
     def __init__(self, n_inputs, in_channels):
         super(PMFS, self).__init__()
-        self.amff_out_channels = [12, 12, 12, 12, 12]
+        self.amff_out_channels = [12, 12, 12, 12, 12][:n_inputs]
         self.amff = AMFF(n_inputs = n_inputs, in_channels = in_channels, out_channels = self.amff_out_channels)
         
         self.attention_in_channels = sum(self.amff_out_channels)
@@ -347,14 +394,21 @@ class Decoder(nn.Module):
         x = self.conv4(x)
 
         x = F.interpolate(x, size=(self.output_size, self.output_size), mode='bilinear', align_corners=False)
-        return self.out_conv(x)  # [B, 1, 224, 224]
+        return torch.sigmoid(self.out_conv(x))  # [B, 1, 224, 224]
 
 class HybridSegModel(nn.Module):
     def __init__(self, in_channels = 1, out_channels = 2, output_size = 224):
         super(HybridSegModel, self).__init__()
-        self.backbone = HarDNetBackbone(in_channels)
 
-        n_attention = 5
+        ch_list=[128, 256, 320, 640, 1024]
+        gr_list=[14, 16, 20, 40, 160]
+        n_layers=[8, 16, 16, 16, 4]
+        pool_layer=[1, 0, 1, 1, 0]
+        
+        layers_num = 3
+        self.backbone = HarDNetBackbone(in_channels, ch_list = ch_list[:layers_num], gr_list = gr_list[:layers_num], n_layers = n_layers[:layers_num], pool_layer = pool_layer[:layers_num])
+
+        n_attention = layers_num + 1
         pmfs_in_channels = self.backbone.attention_channels
         self.pmfs = PMFS(n_inputs = n_attention, in_channels = pmfs_in_channels)
 
