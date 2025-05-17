@@ -274,49 +274,51 @@ class PMFS(nn.Module):
         pmss_out = self.pmss(pmcs_out)
         return pmss_out
 
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
 class Decoder(nn.Module):
-    def __init__(self, in_channels=60, out_channels=1, output_size = 224):
+    def __init__(self, in_channels=60, out_channels=1, output_size=224, layers_num=4):
         super(Decoder, self).__init__()
 
-        self.up1 = nn.ConvTranspose2d(in_channels, 64, kernel_size=2, stride=2)  # (20 → 40)
-        self.conv1 = nn.Sequential(
-            nn.Conv2d(64, 64, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-        )
+        assert 1 <= layers_num <= 4, "layers_num 必須是 1 到 4 之間"
 
-        self.up2 = nn.ConvTranspose2d(64, 32, kernel_size=2, stride=2)  # (40 → 80)
-        self.conv2 = nn.Sequential(
-            nn.Conv2d(32, 32, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-        )
-
-        self.up3 = nn.ConvTranspose2d(32, 16, kernel_size=2, stride=2)  # (80 → 160)
-        self.conv3 = nn.Sequential(
-            nn.Conv2d(16, 16, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-        )
-
-        self.up4 = nn.ConvTranspose2d(16, 8, kernel_size=2, stride=2)   # (160 → 320)
-        self.conv4 = nn.Sequential(
-            nn.Conv2d(8, 8, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-        )
-
-        self.out_conv = nn.Conv2d(8, out_channels, kernel_size=1)  # map to [B, 1, 224, 224]
-
+        self.layers_num = layers_num
         self.output_size = output_size
+
+        # 全部 4 層的設計：對應 (in → out, size)
+        channels = [64, 32, 16, 8][-layers_num:]
+        channels = [in_channels] + channels
+        # print(channels)
+        self.all_ups = nn.ModuleList([
+            nn.ConvTranspose2d(channels[i], channels[i + 1], kernel_size=2, stride=2) for i in range(layers_num)
+        ])
+            
+
+        self.all_convs = nn.ModuleList([
+            nn.Sequential(nn.Conv2d(channels[i + 1], channels[i + 1], kernel_size=3, padding=1), nn.ReLU(inplace=True)) for i in range(layers_num)
+        ])
+
+        # 根據 layers_num 只保留最後 N 層
+        self.ups = self.all_ups
+        self.convs = self.all_convs
+
+        # 輸出層根據最後一層 conv 的 output channel 決定
+        out_ch = 8
+        self.out_conv = nn.Conv2d(out_ch, out_channels, kernel_size=1)
+
     def forward(self, x):
-        x = self.up1(x)       # [B, 64, 40, 40]
-        x = self.conv1(x)
-        x = self.up2(x)       # [B, 32, 80, 80]
-        x = self.conv2(x)
-        x = self.up3(x)       # [B, 16, 160, 160]
-        x = self.conv3(x)
-        x = self.up4(x)       # [B, 8, 320, 320]
-        x = self.conv4(x)
+        for up, conv in zip(self.ups, self.convs):
+            # print("origin")
+            # print(x.shape)
+            x = up(x)
+            # print(x.shape)
+            x = conv(x)
+            # print(x.shape)
 
         x = F.interpolate(x, size=(self.output_size, self.output_size), mode='bilinear', align_corners=False)
-        return self.out_conv(x)  # [B, 1, 224, 224]
+        return self.out_conv(x)
         
 class UpsampleConvBlock(nn.Module):
     def __init__(self, in_channels, out_channels=32, output_size=224):
@@ -347,7 +349,8 @@ class HybridSegModel(nn.Module):
 
         decoder_in_channels = self.pmfs.attention_in_channels
         decoder_out_channels = 32
-        self.decoder = Decoder(in_channels = decoder_in_channels, out_channels = decoder_out_channels, output_size = output_size)
+        decoder_layers = layers_num - 1
+        self.decoder = Decoder(in_channels = decoder_in_channels, out_channels = decoder_out_channels, output_size = output_size, layers_num = decoder_layers)
         
         self.upsample_list = nn.ModuleList([
             UpsampleConvBlock(64, out_channels=32, output_size=output_size),
