@@ -113,7 +113,7 @@ class Thyroid_Dataset(Dataset):
     
         # Optional: visualize the contour
         contour_image = np.zeros_like(mask_bin)
-        cv2.drawContours(contour_image, contours, -1, 255, 1)
+        cv2.drawContours(contour_image, contours, -1, 255, thickness=3)
         contour_image = contour_image.astype(np.float32) / 255.0
         
         contour_image = torch.tensor(contour_image)
