@@ -6,16 +6,18 @@ import torch.nn.functional as F
 # No need to do any activation in train pipeline, model output activation will be add it here.
 
 class DiceLoss(nn.Module):
-    def __init__(self, smooth=1e-6):
+    def __init__(self, smooth=1e-6, need_act = True):
         super(DiceLoss, self).__init__()
         self.smooth = smooth
+        self.need_act = need_act
 
     def forward(self, inputs, targets):
         """
         inputs: (N, 1, H, W) - predicted probabilities (after sigmoid)
         targets: (N, 1, H, W) - ground truth (0 or 1)
         """
-        inputs = nn.Sigmoid()(inputs)
+        if self.need_act:
+            inputs = nn.Sigmoid()(inputs)
         inputs = inputs.view(-1)
         targets = targets.view(-1)
 
@@ -25,14 +27,15 @@ class DiceLoss(nn.Module):
         return 1 - dice  # because we want to minimize the loss
 
 
-def IOU_score(preds, targets, threshold=0.5, eps=1e-6):
+def IOU_score(preds, targets, threshold=0.5, eps=1e-6, need_act = True):
     """
     preds: (N, 1, H, W) - predicted probabilities
     targets: (N, 1, H, W) - ground truth binary mask (0 or 1)
     threshold: threshold to binarize predictions
     eps: small value to avoid division by zero
     """
-    preds = nn.Sigmoid()(preds)
+    if need_act:
+        preds = nn.Sigmoid()(preds)
     preds = (preds > threshold).float()
     targets = targets.float()
 
