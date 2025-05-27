@@ -70,3 +70,40 @@ class StructureLoss(nn.Module):
 
         return (wbce + wiou).mean()  # because we want to minimize the loss
 
+import torch
+import torch.nn as nn
+
+class TverskyLoss(nn.Module):
+    def __init__(self, alpha=0.5, beta=0.5, smooth=1e-6):
+        """
+        Tversky Loss function
+
+        Args:
+            alpha: weight for false positives
+            beta: weight for false negatives
+            smooth: smoothing constant to avoid division by zero
+        """
+        super(TverskyLoss, self).__init__()
+        self.alpha = alpha
+        self.beta = beta
+        self.smooth = smooth
+
+    def forward(self, inputs, targets):
+        """
+        Args:
+            inputs: predicted tensor with shape [B, 1, H, W] or [B, H, W]
+            targets: ground truth tensor with same shape as inputs
+        """
+        inputs = torch.sigmoid(inputs)  # if not already probabilities
+
+        # Flatten
+        inputs = inputs.view(-1)
+        targets = targets.view(-1)
+
+        TP = (inputs * targets).sum()
+        FP = ((1 - targets) * inputs).sum()
+        FN = (targets * (1 - inputs)).sum()
+
+        tversky_index = (TP + self.smooth) / (TP + self.alpha * FP + self.beta * FN + self.smooth)
+        return 1 - tversky_index
+
