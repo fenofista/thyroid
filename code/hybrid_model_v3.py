@@ -98,6 +98,53 @@ class EncoderBlock(nn.Module):
 
 
 
+# class HarDNetBackbone(nn.Module):
+#     def __init__(
+#         self,
+#         in_channels=1,
+#         base_out_ch=[32, 64],
+#         grmul=1.7,
+#         drop_rate=0.1,
+#         ch_list=[128, 256, 320, 640, 1024],
+#         gr_list=[14, 16, 20, 40, 160],
+#         n_layers=[8, 16, 16, 16, 4],
+#         pool_layer=[1, 0, 1, 1, 0]
+#     ):
+#         super(HarDNetBackbone, self).__init__()
+
+#         assert len(ch_list) == len(gr_list) == len(n_layers), "Length of ch_list, gr_list, and n_layers must match"
+
+#         self.base_conv_1 = ConvLayer(in_channels=in_channels, out_channels=base_out_ch[0], kernel=3, stride=2, bias=False)
+#         self.base_conv_2 = ConvLayer(in_channels=base_out_ch[0], out_channels=base_out_ch[1], kernel=3)
+#         self.base_max_pool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+
+#         self.encoder_blocks = nn.ModuleList()
+#         self.encoder_pools = nn.ModuleList()
+#         self.attention_channels = [base_out_ch[1]]  # First attention from base_conv2
+#         self.pool_layer = pool_layer
+#         in_ch = base_out_ch[1]
+#         for i in range(len(ch_list)):
+#             block = EncoderBlock(in_ch, gr_list[i], grmul, n_layers[i], ch_list[i])
+#             self.encoder_blocks.append(block)
+#             self.attention_channels.append(ch_list[i])
+#             self.encoder_pools.append(nn.MaxPool2d(kernel_size=2, stride=2))
+#             in_ch = ch_list[i]
+
+#     def forward(self, x):
+#         attention_list = []
+#         x = self.base_conv_1(x)
+#         x = self.base_conv_2(x)
+#         attention_list.append(x)
+        
+#         x = self.base_max_pool(x)
+
+#         for i, block in enumerate(self.encoder_blocks):
+#             x = block(x)
+#             attention_list.append(x)
+#             if self.pool_layer[i]:
+#                 x = self.encoder_pools[i](x)
+
+#         return attention_list
 class HarDNetBackbone(nn.Module):
     def __init__(
         self,
@@ -116,35 +163,45 @@ class HarDNetBackbone(nn.Module):
 
         self.base_conv_1 = ConvLayer(in_channels=in_channels, out_channels=base_out_ch[0], kernel=3, stride=2, bias=False)
         self.base_conv_2 = ConvLayer(in_channels=base_out_ch[0], out_channels=base_out_ch[1], kernel=3)
+        # 加入 dropout
+        self.base_dropout = nn.Dropout2d(p=drop_rate)
+
         self.base_max_pool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 
         self.encoder_blocks = nn.ModuleList()
         self.encoder_pools = nn.ModuleList()
-        self.attention_channels = [base_out_ch[1]]  # First attention from base_conv2
+        self.encoder_dropouts = nn.ModuleList()  # 加一個 dropout list
+        self.attention_channels = [base_out_ch[1]]
         self.pool_layer = pool_layer
+
         in_ch = base_out_ch[1]
         for i in range(len(ch_list)):
             block = EncoderBlock(in_ch, gr_list[i], grmul, n_layers[i], ch_list[i])
             self.encoder_blocks.append(block)
             self.attention_channels.append(ch_list[i])
             self.encoder_pools.append(nn.MaxPool2d(kernel_size=2, stride=2))
+            self.encoder_dropouts.append(nn.Dropout2d(p=drop_rate))  # 對應 encoder block 加入 Dropout
             in_ch = ch_list[i]
 
+
     def forward(self, x):
-        attention_list = []
-        x = self.base_conv_1(x)
-        x = self.base_conv_2(x)
-        attention_list.append(x)
+            attention_list = []
+            x = self.base_conv_1(x)
+            x = self.base_conv_2(x)
+            x = self.base_dropout(x)
         
-        x = self.base_max_pool(x)
-
-        for i, block in enumerate(self.encoder_blocks):
-            x = block(x)
             attention_list.append(x)
-            if self.pool_layer[i]:
-                x = self.encoder_pools[i](x)
-
-        return attention_list
+            
+            x = self.base_max_pool(x)
+    
+            for i, block in enumerate(self.encoder_blocks):
+                x = block(x)
+                x = self.encoder_dropouts[i](x)
+                attention_list.append(x)
+                if self.pool_layer[i]:
+                    x = self.encoder_pools[i](x)
+    
+            return attention_list
 class AMFF(nn.Module):
     def __init__(self, n_inputs=5, in_channels = [0, 0, 0, 0, 0], out_channels = [12, 12, 12, 12, 12]):
         super(AMFF, self).__init__()
@@ -332,7 +389,7 @@ class UpsampleConvBlock(nn.Module):
         return x
         
 class HybridSegModel(nn.Module):
-    def __init__(self, in_channels = 1, out_channels = 2, output_size = 224, layers_num = 5):
+    def __init__(self, in_channels = 1, out_channels = 2, output_size = 224, layers_num = 5, dropout_rate = 0.0):
         super(HybridSegModel, self).__init__()
 
         ch_list=[128, 256, 320, 640, 1024]
@@ -341,7 +398,7 @@ class HybridSegModel(nn.Module):
         pool_layer=[1, 0, 1, 1, 0]
         
         self.layers_num = layers_num
-        self.backbone = HarDNetBackbone(in_channels, ch_list = ch_list[:layers_num], gr_list = gr_list[:layers_num], n_layers = n_layers[:layers_num], pool_layer = pool_layer[:layers_num])
+        self.backbone = HarDNetBackbone(in_channels, ch_list = ch_list[:layers_num], gr_list = gr_list[:layers_num], n_layers = n_layers[:layers_num], pool_layer = pool_layer[:layers_num], drop_rate = dropout_rate)
 
         n_attention = layers_num + 1
         pmfs_in_channels = self.backbone.attention_channels
