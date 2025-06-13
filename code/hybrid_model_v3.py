@@ -15,7 +15,14 @@ class ConvLayer(nn.Module):
         x = self.norm(x)
         x = self.relu(x)
         return x
-
+class CombConvLayer(nn.Sequential):
+    def __init__(self, in_channels, out_channels, kernel=1, stride=1, dropout=0.1, bias=False):
+        super().__init__()
+        self.add_module('layer1',ConvLayer(in_channels, out_channels, kernel))
+        self.add_module('layer2',DWConvLayer(out_channels, out_channels, stride=stride))
+        
+    def forward(self, x):
+        return super().forward(x)
 class HarDBlock(nn.Module):
     def get_link(self, layer, base_ch, growth_rate, grmul):
         if layer == 0:
@@ -84,10 +91,10 @@ class HarDBlock(nn.Module):
         return out
 
 class EncoderBlock(nn.Module):
-    def __init__(self, in_channels, gr, grmul, n_layer, out_channels):
+    def __init__(self, in_channels, gr, grmul, n_layer, out_channels, depth_wise):
         super(EncoderBlock, self).__init__()
 
-        self.hardblock = HarDBlock(in_channels, gr, grmul, n_layer)
+        self.hardblock = HarDBlock(in_channels, gr, grmul, n_layer, dwconv = depth_wise)
         conv_in_ch = self.hardblock.get_out_ch()
         self.conv = ConvLayer(conv_in_ch, out_channels, kernel=1)
         
@@ -145,6 +152,20 @@ class EncoderBlock(nn.Module):
 #                 x = self.encoder_pools[i](x)
 
 #         return attention_list
+class DWConvLayer(nn.Sequential):
+    def __init__(self, in_channels, out_channels,  stride=1,  bias=False):
+        super().__init__()
+        out_ch = out_channels
+        
+        groups = in_channels
+        kernel = 3
+        #print(kernel, 'x', kernel, 'x', out_channels, 'x', out_channels, 'DepthWise')
+        
+        self.add_module('dwconv', nn.Conv2d(groups, groups, kernel_size=3,
+                                          stride=stride, padding=1, groups=groups, bias=bias))
+        self.add_module('norm', nn.BatchNorm2d(groups))
+    def forward(self, x):
+        return super().forward(x)  
 class HarDNetBackbone(nn.Module):
     def __init__(
         self,
@@ -155,31 +176,40 @@ class HarDNetBackbone(nn.Module):
         ch_list=[128, 256, 320, 640, 1024],
         gr_list=[14, 16, 20, 40, 160],
         n_layers=[8, 16, 16, 16, 4],
-        pool_layer=[1, 0, 1, 1, 0]
+        pool_layer=[1, 0, 1, 1, 0],
+        depth_wise = False
     ):
         super(HarDNetBackbone, self).__init__()
 
         assert len(ch_list) == len(gr_list) == len(n_layers), "Length of ch_list, gr_list, and n_layers must match"
 
         self.base_conv_1 = ConvLayer(in_channels=in_channels, out_channels=base_out_ch[0], kernel=3, stride=2, bias=False)
-        self.base_conv_2 = ConvLayer(in_channels=base_out_ch[0], out_channels=base_out_ch[1], kernel=3)
+        if depth_wise == False:
+            self.base_conv_2 = ConvLayer(in_channels=base_out_ch[0], out_channels=base_out_ch[1], kernel=3)
+        else:
+            self.base_conv_2 = ConvLayer(in_channels=base_out_ch[0], out_channels=base_out_ch[1], kernel=1)
         # 加入 dropout
         self.base_dropout = nn.Dropout2d(p=drop_rate)
-
-        self.base_max_pool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        if depth_wise == False:
+            self.base_down = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        else:
+            self.base_down = DWConvLayer(base_out_ch[1], base_out_ch[1], stride=2)
 
         self.encoder_blocks = nn.ModuleList()
-        self.encoder_pools = nn.ModuleList()
+        self.encoder_down = nn.ModuleList()
         self.encoder_dropouts = nn.ModuleList()  # 加一個 dropout list
         self.attention_channels = [base_out_ch[1]]
         self.pool_layer = pool_layer
 
         in_ch = base_out_ch[1]
         for i in range(len(ch_list)):
-            block = EncoderBlock(in_ch, gr_list[i], grmul, n_layers[i], ch_list[i])
+            block = EncoderBlock(in_ch, gr_list[i], grmul, n_layers[i], ch_list[i], depth_wise = depth_wise)
             self.encoder_blocks.append(block)
             self.attention_channels.append(ch_list[i])
-            self.encoder_pools.append(nn.MaxPool2d(kernel_size=2, stride=2))
+            if depth_wise == False:
+                self.encoder_down.append(nn.MaxPool2d(kernel_size=2, stride=2))
+            else:
+                self.encoder_down.append(DWConvLayer(ch_list[i], ch_list[i], stride=2))
             self.encoder_dropouts.append(nn.Dropout2d(p=drop_rate))  # 對應 encoder block 加入 Dropout
             in_ch = ch_list[i]
 
@@ -192,25 +222,41 @@ class HarDNetBackbone(nn.Module):
         
             attention_list.append(x)
             
-            x = self.base_max_pool(x)
+            x = self.base_down(x)
     
             for i, block in enumerate(self.encoder_blocks):
                 x = block(x)
                 x = self.encoder_dropouts[i](x)
                 attention_list.append(x)
                 if self.pool_layer[i]:
-                    x = self.encoder_pools[i](x)
+                    x = self.encoder_down[i](x)
     
             return attention_list
+
+class Synthesize_AdaptiveMaxPool(nn.Module):
+    def __init__(self, target_size):
+        super().__init__()
+        self.target_size = target_size
+
+    def forward(self, x):
+        kernel_size = (2,2)
+        x = F.interpolate(x, size=(self.target_size[0] * kernel_size[0], self.target_size[1] * kernel_size[1]), mode='bilinear', align_corners=False)
+
+        return F.max_pool2d(x, kernel_size=kernel_size, stride=(1, 1))
 class AMFF(nn.Module):
-    def __init__(self, n_inputs=5, in_channels = [0, 0, 0, 0, 0], out_channels = [12, 12, 12, 12, 12]):
+    def __init__(self, n_inputs=5, in_channels = [0, 0, 0, 0, 0], out_channels = [12, 12, 12, 12, 12], synthesize_adaptive_max_pool = False):
         super(AMFF, self).__init__()
 
         self.n_inputs = n_inputs
         max_pool_size = (20, 20)
-        self.max_pools = nn.ModuleList([
-            nn.AdaptiveMaxPool2d(max_pool_size) for _ in range(n_inputs)
-        ])
+        if synthesize_adaptive_max_pool:
+            self.max_pools = nn.ModuleList([
+                Synthesize_AdaptiveMaxPool(max_pool_size) for _ in range(n_inputs)
+            ])
+        else:
+            self.max_pools = nn.ModuleList([
+                nn.AdaptiveMaxPool2d(max_pool_size) for _ in range(n_inputs)
+            ])
 
         self.conv = nn.ModuleList([
             nn.Conv2d(in_channels[i], out_channels[i], kernel_size = 3, padding=1) for i in range(n_inputs)
@@ -315,10 +361,10 @@ class PMSS(nn.Module):
         return out
 
 class PMFS(nn.Module):
-    def __init__(self, n_inputs, in_channels):
+    def __init__(self, n_inputs, in_channels, synthesize_adaptive_max_pool = False):
         super(PMFS, self).__init__()
         self.amff_out_channels = [12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12][:n_inputs]
-        self.amff = AMFF(n_inputs = n_inputs, in_channels = in_channels, out_channels = self.amff_out_channels)
+        self.amff = AMFF(n_inputs = n_inputs, in_channels = in_channels, out_channels = self.amff_out_channels, synthesize_adaptive_max_pool = synthesize_adaptive_max_pool)
         
         self.attention_in_channels = sum(self.amff_out_channels)
         self.pmcs = PMCS(in_channels = self.attention_in_channels)
@@ -389,34 +435,42 @@ class UpsampleConvBlock(nn.Module):
         return x
         
 class HybridSegModel(nn.Module):
-    def __init__(self, in_channels = 1, out_channels = 2, output_size = 224, layers_num = 5, dropout_rate = 0.0):
+    def __init__(self, in_channels = 1, out_channels = 2, output_size = 224, layers_num = 5, dropout_rate = 0.0, arch = None, depth_wise = False, synthesize_adaptive_max_pool = False):
         super(HybridSegModel, self).__init__()
 
-        ch_list=[128, 256, 320, 640, 1024]
-        gr_list=[14, 16, 20, 40, 160]
-        n_layers=[8, 16, 16, 16, 4]
-        pool_layer=[1, 0, 1, 1, 0]
-        
+        if arch == 68:
+            base_out_ch  = [32, 64]
+            grmul = 1.7
+            ch_list=[128, 256, 320, 640, 1024]
+            gr_list=[14, 16, 20, 40, 160]
+            n_layers=[8, 16, 16, 16, 4]
+            pool_layer=[1, 0, 1, 1, 0]
+        elif arch == 39:
+            base_out_ch  = [24, 48]
+            ch_list = [  96, 320, 640, 1024]
+            grmul = 1.6
+            gr_list = [  16,  20, 64, 160]
+            n_layers = [   4,  16,  8,   4]
+            pool_layer = [   1,   1,  1,   0]
+
         self.layers_num = layers_num
-        self.backbone = HarDNetBackbone(in_channels, ch_list = ch_list[:layers_num], gr_list = gr_list[:layers_num], n_layers = n_layers[:layers_num], pool_layer = pool_layer[:layers_num], drop_rate = dropout_rate)
+        self.backbone = HarDNetBackbone(in_channels, base_out_ch = base_out_ch, grmul = grmul, ch_list = ch_list[:layers_num], gr_list = gr_list[:layers_num], n_layers = n_layers[:layers_num], pool_layer = pool_layer[:layers_num], drop_rate = dropout_rate, depth_wise = depth_wise)
 
         n_attention = layers_num + 1
         pmfs_in_channels = self.backbone.attention_channels
-        self.pmfs = PMFS(n_inputs = n_attention, in_channels = pmfs_in_channels)
+        self.pmfs = PMFS(n_inputs = n_attention, in_channels = pmfs_in_channels, synthesize_adaptive_max_pool = synthesize_adaptive_max_pool)
 
         decoder_in_channels = self.pmfs.attention_in_channels
         decoder_out_channels = 32
         decoder_layers = layers_num - 1
         self.decoder = Decoder(in_channels = decoder_in_channels, out_channels = decoder_out_channels, output_size = output_size, layers_num = decoder_layers)
+
         
         self.upsample_list = nn.ModuleList([
-            UpsampleConvBlock(64, out_channels=32, output_size=output_size),
-            UpsampleConvBlock(ch_list[0], out_channels=32, output_size=output_size),
-            UpsampleConvBlock(ch_list[1], out_channels=32, output_size=output_size),
-            UpsampleConvBlock(ch_list[2], out_channels=32, output_size=output_size),
-            UpsampleConvBlock(ch_list[3], out_channels=32, output_size=output_size),
-            UpsampleConvBlock(ch_list[4], out_channels=32, output_size=output_size)
+            UpsampleConvBlock(base_out_ch[1], out_channels=32, output_size=output_size),
         ])
+        for i in range(len(ch_list)):
+            self.upsample_list.append(UpsampleConvBlock(ch_list[i], out_channels=32, output_size=output_size))
 
         final_in_channels = self.layers_num * 32 + decoder_out_channels
         self.final_conv = nn.Conv2d(final_in_channels, out_channels, kernel_size=1)
