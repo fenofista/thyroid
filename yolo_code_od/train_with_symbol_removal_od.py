@@ -12,7 +12,7 @@ from pathlib import Path
 
 
 def train_with_symbol_removal():
-    data_root = "/root/Desktop/thyroid"
+    data_root = "/datadrive"
     # data_root = "/Users/tony.tu/Desktop/戴承智慧/thyroid"
     """使用動態增強 + 符號移除訓練模型"""
 
