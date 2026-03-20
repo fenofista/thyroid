@@ -69,7 +69,7 @@ def train_with_symbol_removal():
         patience=20,
         save=True,
         save_period=10,
-        cache=True,
+        cache="disk",
         plots=True,
 
         # 混合模式：自定義影像增強 + YOLO 幾何變換
@@ -79,7 +79,7 @@ def train_with_symbol_removal():
         flipud=0.0,
         fliplr=0.5,
         mosaic=1.0,
-        mixup=0.5,
+        # mixup=0.5,
 
         # 優化器
         optimizer='AdamW',
