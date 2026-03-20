@@ -12,7 +12,7 @@ from pathlib import Path
 
 
 def train_with_symbol_removal():
-    data_root = "/root/Desktop/thyroid"
+    data_root = "/datadrive/"
     # data_root = "/Users/tony.tu  /Desktop/戴承智慧/thyroid"
     """使用動態增強 + 符號移除訓練模型"""
 
@@ -36,7 +36,7 @@ def train_with_symbol_removal():
     batch_size = 64
     img_size = 640
     project = f'{data_root}/yolo_output/runs/seg'
-    name = '2026_03_12(1)'
+    name = '2026_03_20(1)'
     # name = "test"
 
     classes = [0]  # 只訓練結節類別（0）
