@@ -32,12 +32,12 @@ def train_with_symbol_removal():
 
     # 配置參數（完全照原本的方式）
     # data_yaml = f'{data_root}/yolo_data/all_data_nodule_normal_cut_od/data.yaml'
-    data_yaml = f'{data_root}/yolo_data/combined_with_synthesis_od_v2/data.yaml'
+    data_yaml = f'{data_root}/yolo_data/combined_with_synthesis_od_v3/data.yaml'
     epochs = 100
     batch_size = 128
     img_size = 640
     project = f'{data_root}/yolo_output/runs/detect'
-    name = '2026_03_24(1)'
+    name = '2026_03_25(1)'
     # name = "test"
 
     classes = [0]  # 只訓練結節類別（0）
