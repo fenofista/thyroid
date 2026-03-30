@@ -47,7 +47,7 @@ def train_with_symbol_removal():
     print(f"使用設備: {device}")
 
     # 載入模型
-    model = YOLO('yolo26s.pt')
+    model = YOLO('yolo26m.pt')
 
     print("\n" + "="*60)
     print("使用動態增強 + 符號移除訓練 YOLO")
@@ -81,7 +81,7 @@ def train_with_symbol_removal():
         scale=0.5,
         flipud=0.0,
         fliplr=0.5,
-        mosaic=1.0,
+        mosaic=0.0,
         # mixup=1.0,
 
         # 優化器
