@@ -12,14 +12,15 @@ from pathlib import Path
 
 
 def train_with_symbol_removal():
-    data_root = "/datadrive/thyroid"
+    data_root = "/root/Desktop/thyroid"
+    output_root = f"/datadrive/thyroid"
     # data_root = "/Users/tony.tu/Desktop/戴承智慧/thyroid"
     """使用動態增強 + 符號移除訓練模型"""
 
     # =================================================================
     # 步驟 1: 初始化符號移除器（只需要這一行！）
     # =================================================================
-    symbol_folder = f"{data_root}/yolo_data/symbols/gray"  # 替換成你的符號資料夾路徑
+    symbol_folder = f"{output_root}/yolo_data/symbols/gray"  # 替換成你的符號資料夾路徑
     initialize_symbol_remover(symbol_folder, number_of_symbols=200)
 
     # 注意：動態增強已經在檔案開頭啟用（必須在導入 YOLO 之前）
@@ -32,12 +33,12 @@ def train_with_symbol_removal():
 
     # 配置參數（完全照原本的方式）
     # data_yaml = f'{data_root}/yolo_data/all_data_nodule_normal_cut_od/data.yaml'
-    data_yaml = f'{data_root}/yolo_data/combined_with_synthesis_od_v3/data.yaml'
+    data_yaml = f'{data_root}/yolo_data/combined_with_synthesis_od_v4/data.yaml'
     epochs = 100
-    batch_size = 128
+    batch_size = -1
     img_size = 640
-    project = f'{data_root}/yolo_output/runs/detect'
-    name = '2026_03_25(1)'
+    project = f'{output_root}/yolo_output/runs/detect'
+    name = '2026_03_30(1)'
     # name = "test"
 
     classes = [0]  # 只訓練結節類別（0）
@@ -71,6 +72,7 @@ def train_with_symbol_removal():
         save=True,
         save_period=10,
         cache="disk",
+        # cache=False,
         plots=True,
 
         # 混合模式：自定義影像增強 + YOLO 幾何變換
