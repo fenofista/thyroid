@@ -33,7 +33,7 @@ def train_with_symbol_removal():
 
     # 配置參數（完全照原本的方式）
     # data_yaml = f'{data_root}/yolo_data/all_data_nodule_normal_cut_od/data.yaml'
-    data_yaml = f'{data_root}/yolo_data/combined_with_synthesis_od_v4/data.yaml'
+    data_yaml = f'{data_root}/yolo_data/combined_with_synthesis_od_v5/data.yaml'
     epochs = 100
     batch_size = -1
     img_size = 640
@@ -81,8 +81,8 @@ def train_with_symbol_removal():
         scale=0.5,
         flipud=0.0,
         fliplr=0.5,
-        # mosaic=0.0,
-        # mixup=1.0,
+        mosaic=0.0,
+        mixup=0.0,
 
         # 優化器
         optimizer='AdamW',
