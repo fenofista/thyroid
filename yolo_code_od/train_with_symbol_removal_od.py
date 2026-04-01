@@ -38,7 +38,7 @@ def train_with_symbol_removal():
     batch_size = -1
     img_size = 640
     project = f'{output_root}/yolo_output/runs/detect'
-    name = '2026_03_30(1)'
+    name = '2026_04_01(1)'
     # name = "test"
 
     classes = [0]  # 只訓練結節類別（0）
@@ -81,7 +81,7 @@ def train_with_symbol_removal():
         scale=0.5,
         flipud=0.0,
         fliplr=0.5,
-        mosaic=0.0,
+        # mosaic=0.0,
         # mixup=1.0,
 
         # 優化器
