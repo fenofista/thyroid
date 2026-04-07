@@ -38,7 +38,7 @@ def train_with_symbol_removal():
     batch_size = -1
     img_size = 640
     project = f'{output_root}/yolo_output/runs/detect'
-    name = '2026_04_01(1)'
+    name = '2026_04_07(1)'
     # name = "test"
 
     classes = [0]  # 只訓練結節類別（0）
@@ -47,7 +47,7 @@ def train_with_symbol_removal():
     print(f"使用設備: {device}")
 
     # 載入模型
-    model = YOLO('yolo26m.pt')
+    model = YOLO('yolo12s.pt')
 
     print("\n" + "="*60)
     print("使用動態增強 + 符號移除訓練 YOLO")
@@ -81,7 +81,7 @@ def train_with_symbol_removal():
         scale=0.5,
         flipud=0.0,
         fliplr=0.5,
-        mosaic=0.0,
+        mosaic=0.1,
         mixup=0.0,
 
         # 優化器
