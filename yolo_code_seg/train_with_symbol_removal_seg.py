@@ -12,14 +12,15 @@ from pathlib import Path
 
 
 def train_with_symbol_removal():
-    data_root = "/datadrive/thyroid"
+    data_root = "/root/Desktop/thyroid"
+    output_root = f"/datadrive/thyroid"
     # data_root = "/Users/tony.tu  /Desktop/戴承智慧/thyroid"
     """使用動態增強 + 符號移除訓練模型"""
 
     # =================================================================
     # 步驟 1: 初始化符號移除器（只需要這一行！）
     # =================================================================
-    symbol_folder = f"{data_root}/yolo_data/symbols/gray"  # 替換成你的符號資料夾路徑
+    symbol_folder = f"{output_root}/yolo_data/symbols/gray"  # 替換成你的符號資料夾路徑
     initialize_symbol_remover(symbol_folder, number_of_symbols=200)
 
     # 注意：動態增強已經在檔案開頭啟用（必須在導入 YOLO 之前）
@@ -31,12 +32,12 @@ def train_with_symbol_removal():
     # =================================================================
 
     # 配置參數（完全照原本的方式）
-    data_yaml = f'{data_root}/yolo_data/combined_with_synthesis_seg_v3/data.yaml'
+    data_yaml = f'{data_root}/yolo_data/seg/v4/data.yaml'
     epochs = 100
-    batch_size = 64
+    batch_size = -1
     img_size = 640
-    project = f'{data_root}/yolo_output/runs/seg'
-    name = '2026_03_26(1)'
+    project = f'{output_root}/yolo_output/runs/seg'
+    name = '2026_04_21(1)'
     # name = "test"
 
     classes = [0]  # 只訓練結節類別（0）
@@ -45,7 +46,7 @@ def train_with_symbol_removal():
     print(f"使用設備: {device}")
 
     # 載入模型
-    model = YOLO('yolo26s-seg.pt')
+    model = YOLO('yolo26m-seg.pt')
 
     print("\n" + "="*60)
     print("使用動態增強 + 符號移除訓練 YOLO")
