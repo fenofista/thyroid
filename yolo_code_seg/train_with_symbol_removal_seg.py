@@ -34,7 +34,7 @@ def train_with_symbol_removal():
     # 配置參數（完全照原本的方式）
     data_yaml = f'{data_root}/yolo_data/seg/v4/data.yaml'
     epochs = 100
-    batch_size = -1
+    batch_size = 32
     img_size = 640
     project = f'{output_root}/yolo_output/runs/seg'
     name = '2026_04_21(1)'
